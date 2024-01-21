@@ -49,10 +49,11 @@ const App = () => {
         },
         (error) => {
           console.error('Error getting user location:', error);
+          alert('Failed to get your location. Please try again.');
         }
       );
     } else {
-      console.error('Geolocation is not supported in this browser.');
+      alert('Geolocation is not supported in this browser.');
     }
   }
 
@@ -101,6 +102,7 @@ const App = () => {
       })
       .catch(error => {
         console.error('Error fetching countries:', error);
+        alert("Failed to fetch data. Please check your internet connection and try again.");
       });
   }, []);
 
