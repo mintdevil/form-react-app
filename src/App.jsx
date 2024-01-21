@@ -151,6 +151,7 @@ const App = () => {
     }
 
     setTableData([...tableData, newData]);
+    setFormOpen(false);
   };
 
   const renderForm = () => {
@@ -183,22 +184,22 @@ const App = () => {
               <Label htmlFor="phone" value="Phone Number" />
             </div>
             <div className="flex w-full">
-              <Select className="w-1/5 form-input" id="phoneCode" name="phoneCode" ref={codeRef} required>
+              <Select className="w-2/5 form-input" id="phoneCode" name="phoneCode" ref={codeRef} required>
                 {countries
-                  .filter(country => country.code !== '')
+                  .filter((country, index, self) => country.code !== '' && index === self.findIndex(c => c.code === country.code))
                   .sort((a, b) => a.code.localeCompare(b.code))
                   .map((country, index) => (
                     <option key={index} value={country.code}>{country.code}</option>
                   ))}
               </Select>
-              <TextInput className="ml-2 w-4/5" id="phone" name="phone" type="tel" required />
+              <TextInput className="ml-2 w-3/5" id="phone" name="phone" type="tel" required />
             </div>
           </div>
           <div>
             <div className="mb-2 block">
               <Label htmlFor="dateOfBirth" value="Date of Birth" />
             </div>
-            <TextInput id="dateOfBirth" name="dateOfBirth" type="date" required />
+            <TextInput id="dateOfBirth" name="dateOfBirth" type="date" max={new Date().toISOString().split('T')[0]} required />
           </div>
           <div>
             <div className="mb-2 block">
