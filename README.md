@@ -38,7 +38,7 @@ The application has been deployed on github pages. You can access the deployed v
    
 2. Make sure you have Node.js version `20.11.0` and npm version `10.2.4` installed. 
 
-To check your current versions:
+   To check your current versions:
 ```
 node -v
 npm -v
