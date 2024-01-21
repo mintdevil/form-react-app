@@ -4,7 +4,7 @@
     "address": "123 Main St",
     "email": "john.doe@example.com",
     "phoneCode": "+65",
-    "phone": "555-1234",
+    "phone": "5551234",
     "dateOfBirth": "1990-01-01",
     "nationality": "United States",
     "gender": "Male"
@@ -14,7 +14,7 @@
     "address": "456 Oak St",
     "email": "jane.smith@example.com",
     "phoneCode": "+44",
-    "phone": "777-5678",
+    "phone": "7775678",
     "dateOfBirth": "1985-05-15",
     "nationality": "United Kingdom",
     "gender": "Female"
@@ -24,7 +24,7 @@
     "address": "789 Pine St",
     "email": "bob.johnson@example.com",
     "phoneCode": "+33",
-    "phone": "999-9876",
+    "phone": "9999876",
     "dateOfBirth": "1978-11-30",
     "nationality": "France",
     "gender": "Male"

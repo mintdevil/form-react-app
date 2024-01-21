@@ -2,19 +2,23 @@ import { useState, useEffect, useRef } from 'react';
 import { Table, Button, Label, TextInput, Select } from 'flowbite-react'
 import { MoonIcon, SunIcon, PlusCircleIcon, MinusCircleIcon } from '@heroicons/react/24/outline';
 import { TECollapse } from "tw-elements-react";
-import userData from './data.json';
+import exampleData from './data.json';
 import './index.css';
 import axios from 'axios';
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
   const [formOpen, setFormOpen] = useState(false);
+  const [tableData, setTableData] = useState(exampleData);
+
   const [countries, setCountries] = useState([]);
   const [userAddress, setUserAddress] = useState('');
   const [userNationality, setUserNationality] = useState('');
   const [userPhoneCode, setUserPhoneCode] = useState('');
-  const [tableData, setTableData] = useState(userData);
 
+  const formRef = useRef(null);
+
+  // For dark mode
   useEffect(() => {
     const isDarkMode = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDarkMode);
@@ -29,10 +33,13 @@ const App = () => {
     setDarkMode((prevMode) => !prevMode);
   };
 
+  // Opens form when user clicks on "Add Item" button
+  // Closes form when user clicks on "Close" button
   const toggleForm = () => {
     setFormOpen((prevFormOpen) => !prevFormOpen);
   };
 
+  // For location API
   const getLocation = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -49,6 +56,7 @@ const App = () => {
     }
   }
 
+  // gets user's address from latitude and longitude using geoapify API
   const reverseGeocode = async (latitude, longitude) => {
     const apiKey = import.meta.env.VITE_LOCATION_API_KEY;
     const apiUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
@@ -69,11 +77,10 @@ const App = () => {
     }
   };
 
+  // Fetch country information (name and phone code) from REST Countries API
   useEffect(() => {
-    // Fetch countries from the REST Countries API
     axios.get('https://restcountries.com/v3.1/all?fields=name,idd')
       .then(response => {
-        // Extract country names and codes from the API response
         const countriesData = response.data.flatMap(country => {
           const root = country.idd.root || '';
           const suffixes = country.idd.suffixes || [];
@@ -97,10 +104,12 @@ const App = () => {
       });
   }, []);
 
+  // Refs for inputs that can change with location API
   const addressRef = useRef(null);
   const countryRef = useRef(null);
   const codeRef = useRef(null);
 
+  // Changing inputs when location API is called
   useEffect(() => {
     if (userAddress) {
       addressRef.current.value = userAddress;
@@ -109,6 +118,7 @@ const App = () => {
 
   useEffect(() => {
     if (userNationality) {
+      // Check if country exists in the list of countries
       const selectedCountry = countries.find(country => country.name === userNationality);
       if (selectedCountry) {
         countryRef.current.value = selectedCountry.name;
@@ -118,6 +128,7 @@ const App = () => {
 
   useEffect(() => {
     if (userPhoneCode) {
+      // Check if country exists in the list of countries
       const selectedCountry = countries.find(country => country.code === userPhoneCode);
       if (selectedCountry) {
         codeRef.current.value = selectedCountry.code;
@@ -125,6 +136,7 @@ const App = () => {
     }
   }, [countries, userPhoneCode]);
 
+  // Function called when user submits form
   const handleSubmit = (event) => {
     event.preventDefault();
   
@@ -150,14 +162,21 @@ const App = () => {
       'gender': gender
     }
 
+    // Append new data to table
     setTableData([...tableData, newData]);
+
+    // Reset form
     setFormOpen(false);
+    formRef.current.reset();
+    setUserAddress('');
+    setUserNationality('');
+    setUserPhoneCode('');
   };
 
   const renderForm = () => {
     return (
       <TECollapse className="mb-4 bg-gray-100 dark:bg-gray-900 p-5 rounded-md max-w-md shadow-none" show={formOpen}>
-        <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
           <div>
             <div className="mb-2 block">
               <Label htmlFor="name" value="Name" />
@@ -185,6 +204,7 @@ const App = () => {
             </div>
             <div className="flex w-full">
               <Select className="w-2/5 form-input" id="phoneCode" name="phoneCode" ref={codeRef} required>
+                {/* Filter out duplicate country codes and sort */}
                 {countries
                   .filter((country, index, self) => country.code !== '' && index === self.findIndex(c => c.code === country.code))
                   .sort((a, b) => a.code.localeCompare(b.code))
@@ -192,13 +212,14 @@ const App = () => {
                     <option key={index} value={country.code}>{country.code}</option>
                   ))}
               </Select>
-              <TextInput className="ml-2 w-3/5" id="phone" name="phone" type="tel" required />
+              <TextInput className="ml-2 w-3/5" id="phone" name="phone" type="number" required />
             </div>
           </div>
           <div>
             <div className="mb-2 block">
               <Label htmlFor="dateOfBirth" value="Date of Birth" />
             </div>
+            {/* Disable selection of future dates */}
             <TextInput id="dateOfBirth" name="dateOfBirth" type="date" max={new Date().toISOString().split('T')[0]} required />
           </div>
           <div>
@@ -206,6 +227,7 @@ const App = () => {
               <Label htmlFor="nationality" value="Nationality" />
             </div>
             <Select id="nationality" name="nationality" className="form-input" ref={countryRef} required>
+              {/* Filter out duplicate countries and sort alphabetically*/}
               {countries
                 .filter((country, index, self) => {
                   return index === self.findIndex(c => c.name === country.name);
